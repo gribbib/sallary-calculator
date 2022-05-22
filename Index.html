@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Lohnumrechner</title>
+    <style>
+        body {
+            background-color: #dfd4a4;
+        }
+
+        input {
+            width: 80px;
+            min-height: 30px;
+        }
+
+        label {
+            display: block;
+        }
+
+        table {
+            border-collapse: collapse;
+            table-layout: fixed;
+            width: 100%;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px dotted grey;
+        }
+
+        th {
+            background-color: aliceblue;
+        }
+
+        td {
+            color: rgb(100, 100, 100);
+            word-wrap: break-word;
+        }
+
+        .free {
+            background-color: rgb(215, 255, 156);
+        }
+
+        .occupied {
+            background-color: lightcoral;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .not-bold {
+            font-weight: normal;
+        }
+
+        .places-empty {
+            color: green;
+        }
+
+        .places-half {
+            color: orange;
+        }
+
+        .places-nearly-full {
+            color: red;
+        }
+
+        .font-small {
+            font-size: small;
+        }
+    </style>
+</head>
+
+<body onload="initialLoad()">
+    <h1>Rechne dein Gehalt in verschiedene Formate um</h1>
+    <p>Jahresgehalt</p>
+    <p>Jahr:
+        <input id="input-year" data-type="year" type="number" onchange="calculateSallary(this)">
+    </p>
+    <p>Wochentage:
+        <input id="input-week-days" type="number" readonly>
+    </p>
+    <div style="display: inline-flex;">
+        <div>
+            <h2>Aktuell</h2>
+            <p>40h/Woche:
+                <input id="input-current-40" data-type="40" data-time="current" type="number" min="0" step="0.01"
+                    onchange="calculateSallary(this)">
+                <input id="input-current-month-40" data-type="40" data-time="current" type="number" min="0" step="0.01"
+                    onchange="calculateSallaryMonthly(this)">
+            </p>
+            <p>35h/Woche:
+                <input id="input-current-35" data-type="35" data-time="current" type="number" min="0" step="0.01"
+                    onchange="calculateSallary(this)">
+                <input id="input-current-month-35" data-type="35" data-time="current" type="number" min="0" step="0.01"
+                    onchange="calculateSallaryMonthly(this)">
+            </p>
+            <p>Stundenlohn:
+                <input id="input-current-hourly" data-type="hourly" data-time="current" type="number" min="0"
+                    step="0.01" onchange="calculateSallary(this)">
+            </p>
+        </div>
+        <div>
+            <p>Lohnsteigerung um %</p>
+            <input id="input-percent" data-type="percent" type="number" step="0.01"
+                onchange="calculateSallaryByPercentage(this)">
+        </div>
+        <div>
+            <h2>Zukunft</h2>
+            <p>40h/Woche:
+                <input id="input-future-40" data-type="40" data-time="future" type="number" min="0" step="0.01"
+                    onchange="calculateSallary(this)">
+                <input id="input-future-month-40" data-type="40" data-time="future" type="number" min="0" step="0.01"
+                    onchange="calculateSallaryMonthly(this)">
+            </p>
+            <p>35h/Woche:
+                <input id="input-future-35" data-type="35" data-time="future" type="number" min="0" step="0.01"
+                    onchange="calculateSallary(this)">
+                <input id="input-future-month-35" data-type="35" data-time="future" type="number" min="0" step="0.01"
+                    onchange="calculateSallaryMonthly(this)">
+            </p>
+            <p>Stundenlohn:
+                <input id="input-future-hourly" data-type="hourly" data-time="future" type="number" min="0" step="0.01"
+                    onchange="calculateSallary(this)">
+            </p>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+    function initialLoad() {
+        document.getElementById("input-year").value = new Date(Date.now()).getFullYear();
+        calculateSallary(document.getElementById("input-year"));
+    }
+
+    calculationActive = false;
+
+    function calculateSallary(element) {
+        if (!calculationActive) {
+            calculationActive = true;
+            switch (element.dataset.type) {
+                case "40":
+                    document.getElementById("input-" + element.dataset.time + "-month-40").value = (element.value / 12).toFixed(2);
+                    document.getElementById("input-" + element.dataset.time + "-35").value = (element.value * (1 - 1 / 8)).toFixed(2);
+                    document.getElementById("input-" + element.dataset.time + "-month-35").value = (document.getElementById("input-" + element.dataset.time + "-35").value / 12).toFixed(2);
+                    document.getElementById("input-" + element.dataset.time + "-hourly").value = (element.value / document.getElementById("input-week-days").value / 8).toFixed(2);
+                    break;
+                case "35":
+                    document.getElementById("input-" + element.dataset.time + "-month-35").value = (element.value / 12).toFixed(2);
+                    document.getElementById("input-" + element.dataset.time + "-40").value = (element.value * (1 + 1 / 7)).toFixed(2);
+                    document.getElementById("input-" + element.dataset.time + "-month-40").value = (document.getElementById("input-" + element.dataset.time + "-40").value / 12).toFixed(2);
+                    document.getElementById("input-" + element.dataset.time + "-hourly").value = (element.value / document.getElementById("input-week-days").value / 7).toFixed(2);
+                    break;
+                case "hourly":
+                    document.getElementById("input-" + element.dataset.time + "-40").value = (element.value * document.getElementById("input-week-days").value * 8).toFixed(2);
+                    document.getElementById("input-" + element.dataset.time + "-35").value = (element.value * document.getElementById("input-week-days").value * 7).toFixed(2);
+                    document.getElementById("input-" + element.dataset.time + "-month-40").value = (element.value * document.getElementById("input-week-days").value * 8 / 12).toFixed(2);
+                    document.getElementById("input-" + element.dataset.time + "-month-35").value = (element.value * document.getElementById("input-week-days").value * 7 / 12).toFixed(2);
+                    break;
+                case "year":
+                    document.getElementById("input-week-days").value = getWorkingDaysForYear(element.value)
+                    document.getElementById("input-current-hourly").value = (document.getElementById("input-current-40").value / document.getElementById("input-week-days").value / 8).toFixed(2);
+                    document.getElementById("input-future-hourly").value = (document.getElementById("input-future-40").value / document.getElementById("input-week-days").value / 8).toFixed(2);
+                    break;
+            }
+            document.getElementById("input-percent").value = ((document.getElementById("input-future-40").value / document.getElementById("input-current-40").value - 1) * 100).toFixed(2);
+            calculationActive = false;
+        }
+    }
+
+    function calculateSallaryMonthly(element) {
+        if (!calculationActive) {
+            calculationActive = true;
+            switch (element.dataset.type) {
+                case "40":
+                    document.getElementById("input-" + element.dataset.time + "-40").value = (element.value * 12).toFixed(2);
+                    document.getElementById("input-" + element.dataset.time + "-month-35").value = (element.value * (1 - 1 / 8)).toFixed(2);
+                    document.getElementById("input-" + element.dataset.time + "-35").value = (document.getElementById("input-" + element.dataset.time + "-month-35").value * 12).toFixed(2);
+                    document.getElementById("input-" + element.dataset.time + "-hourly").value = (document.getElementById("input-" + element.dataset.time + "-40").value / document.getElementById("input-week-days").value / 8).toFixed(2);
+                    break;
+                case "35":
+                    document.getElementById("input-" + element.dataset.time + "-35").value = (element.value * 12).toFixed(2);
+                    document.getElementById("input-" + element.dataset.time + "-month-40").value = (element.value * (1 + 1 / 7)).toFixed(2);
+                    document.getElementById("input-" + element.dataset.time + "-40").value = (document.getElementById("input-" + element.dataset.time + "-month-40").value * 12).toFixed(2);
+                    document.getElementById("input-" + element.dataset.time + "-hourly").value = (document.getElementById("input-" + element.dataset.time + "-35").value / document.getElementById("input-week-days").value / 7).toFixed(2);
+                    break;
+            }
+            document.getElementById("input-percent").value = ((document.getElementById("input-future-40").value / document.getElementById("input-current-40").value - 1) * 100).toFixed(2);
+            calculationActive = false;
+        }
+    }
+
+    function calculateSallaryByPercentage(element) {
+        document.getElementById("input-future-40").value = (document.getElementById("input-current-40").value * (1 + document.getElementById("input-percent").value / 100)).toFixed(2);
+        calculationActive = false;
+        calculateSallary(document.getElementById("input-future-40"));
+    }
+
+    function getWorkingDaysForYear(year) {
+        var result = 0;
+
+        var startDate = new Date(year, 0, 1);
+        var endDate = new Date(year, 11, 31);
+
+        var currentDate = startDate;
+        while (currentDate <= endDate) {
+
+            var weekDay = currentDate.getDay();
+            if (weekDay != 0 && weekDay != 6)
+                result++;
+
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        return result;
+    }
+
+    function requestData() {
+        var inputDate = document.getElementById("inputDate").valueAsDate.getTime();
+        var fromTime = inputDate + document.getElementById("inputFromTime").valueAsDate.addHours(-2).getTime();
+        var endTime = inputDate + document.getElementById("inputToTime").valueAsDate.getTime();
+        getRequest("https://backend.dr-plano.com/courses_dates?id=67359814&start=" + fromTime + "&end=" + endTime);
+        getRequest("https://backend.dr-plano.com/courses_dates?id=67361411&start=" + fromTime + "&end=" + endTime);
+    }
+
+    Date.prototype.addHours = function (h) {
+        this.setTime(this.getTime() + (h * 60 * 60 * 1000));
+        return this;
+    }
+
+    //Receive data from dr-plano:
+    function getRequest(url) {
+        var request = new XMLHttpRequest();
+        request.open("GET", url);
+        request.addEventListener('load', function (event) {
+            if (request.status >= 200 && request.status < 300) {
+                // console.log(request.responseText);
+                // drPlanoToTable(JSON.parse(request.responseText));
+                drPlanoToColumn(JSON.parse(request.responseText));
+            } else {
+                console.warn(request.statusText, request.responseText);
+            }
+        });
+        request.send();
+    }
+
+    function addChild(type, parent, text, classes) {
+        var node = document.createElement(type);
+        parent.appendChild(node);
+        if (text !== null && text !== undefined && text !== "") {
+            var textNode = document.createTextNode(text);
+            node.appendChild(textNode);
+        }
+        if (classes !== null && classes !== undefined && classes.length !== 0) {
+            node.classList.add(...classes);
+        }
+        return node;
+    }
+
+    function minutes_with_leading_zeros(dt) {
+        return getIntWithLeadingZeros(dt.getMinutes());
+    }
+
+    function getIntWithLeadingZeros(i) {
+        return (i < 10 ? '0' : '') + i;
+    }
+</script>
+
+</html>
